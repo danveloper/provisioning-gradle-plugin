@@ -3,6 +3,14 @@ Provisioning Gradle Plugin
 
 Gradle Plugin for Driving Server Provisioning Through Configuration
 
+Tasks
+---
+
+The plugin provides a few tasks dedicated to the assembly of installation media, as well as the automation of server provisioning. Given a configuration similar to the one below, you would expect to only ever need to use the `gradle provision` task, which would handle the retrieval of the network installation media, its modification, and the automation of the server's deployment.
+
+Sample Build Script
+---
+
 ```groovy
 import static gradle.plugins.provisioning.types.BootProto.*
 
@@ -88,3 +96,17 @@ provisioning {
 }
 
 ```
+
+License
+---
+
+Still trying to work this out.
+
+Author
+---
+
+Dan Woods; t:[@danveloper](http://twitter.com/danveloper)
+
+Date
+---
+10 Dec 2013
