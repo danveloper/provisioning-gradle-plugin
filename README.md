@@ -8,6 +8,12 @@ Tasks
 
 The plugin provides a few tasks dedicated to the assembly of installation media, as well as the automation of server provisioning. Given a configuration similar to the one below, you would expect to only ever need to use the `gradle provision` task, which would handle the retrieval of the network installation media, its modification, and the automation of the server's deployment.
 
+Other tasks that are available:
+  * `generateKickstart`, generates the kickstart configuration from the build script
+  * `downloadInstallImage`, downloads and caches the network installation media
+  * `assembleInstallImage`, manipulates the install iso for unattended install
+  * `provisionServer`, given a provisioning engine (VirtualBox for now), this task will deploy a new server from the below configuration below, attach the installation media, perform the unattended install, and reboot itself in a ready-to-use state.
+
 Sample Build Script
 ---
 
