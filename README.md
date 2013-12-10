@@ -1,4 +1,4 @@
-provisioning-gradle-plugin
+Provisioning Gradle Plugin
 ==========================
 
 Gradle Plugin for Driving Server Provisioning Through Configuration
