@@ -17,4 +17,5 @@ dependencies {
   compile 'com.github.stephenc.java-iso-tools:loop-fs-iso-impl:2.0.0'
   compile 'com.github.stephenc.java-iso-tools:iso9660-writer:2.0.0'
   compile 'org.virtualbox:vboxjws:4.1.4'
+  compile 'com.amazonaws:aws-java-sdk:1.7.1'
 }

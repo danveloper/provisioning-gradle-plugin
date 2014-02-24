@@ -1,68 +1,64 @@
 package gradle.plugins.provisioning
 
+import gradle.plugins.provisioning.aws.AwsDeployConfiguration
 import gradle.plugins.provisioning.internal.dependencies.Packages
 import gradle.plugins.provisioning.internal.disk.Partitioning
 import gradle.plugins.provisioning.internal.network.Networking
-import gradle.plugins.provisioning.virtualbox.VirtualBoxGuestDetail
+import gradle.plugins.provisioning.virtualbox.VirtualBoxMachineDetails
+import org.gradle.api.Action
 import org.gradle.api.Project
 
-/**
- * User: danielwoods
- * Date: 12/8/13
- */
 class ProvisioningProject {
-  String rootpw
-  String installImage
-  String lang = "en_US.UTF-8"
-  String keyboard = "us"
-  String timezone = "Etc/GMT"
-  String postInstall
+    String rootpw
+    String installImage
+    String lang = "en_US.UTF-8"
+    String keyboard = "us"
+    String timezone = "Etc/GMT"
+    String postInstall
+    Boolean poweroff = Boolean.FALSE
 
-  Partitioning partitioning
-  Networking networking
-  Packages packages
+    Partitioning partitioning
+    Networking networking
+    Packages packages
 
-  Project project
+    Project project
 
-  def serverDetails
+    VirtualBoxMachineDetails serverDetails
+    AwsDeployConfiguration awsDetails
 
-  ProvisioningProject(Project project) {
-    this.project = project
-  }
+    ProvisioningProject(Project project) {
+        this.project = project
+    }
 
-  void partitioning(Closure clos) {
-    def partitioning = new Partitioning()
-    clos.delegate = partitioning
-    clos.resolveStrategy = Closure.DELEGATE_ONLY
-    clos.call()
-    this.partitioning = partitioning
-  }
+    void partitioning(Action<Partitioning> action) {
+        partitioning = new Partitioning()
+        action.execute partitioning
+    }
 
-  void network(Closure clos) {
-    def networking = new Networking()
-    clos.delegate = networking
-    clos.resolveStrategy = Closure.DELEGATE_FIRST
-    clos.call()
-    this.networking = networking
-  }
+    void network(Action<Networking> action) {
+        this.networking = new Networking()
+        action.execute networking
+    }
 
-  void packages(Closure clos) {
-    def packages = new Packages()
-    clos.delegate = packages
-    clos.resolveStrategy = Closure.DELEGATE_FIRST
-    clos.call()
-    this.packages = packages
-  }
+    void packages(Action<Packages> action) {
+        packages = new Packages()
+        action.execute packages
+    }
 
-  void postInstall(Closure clos) {
-    this.postInstall = clos.call()
-  }
+    void vbox(Action<VirtualBoxMachineDetails> action) {
+        serverDetails = new VirtualBoxMachineDetails()
+        action.execute serverDetails
+    }
 
-  void vbox(Closure clos) {
-    def details = new VirtualBoxGuestDetail()
-    clos.delegate = details
-    clos.resolveStrategy = Closure.DELEGATE_FIRST
-    clos.call()
-    this.serverDetails = details
-  }
+    void aws(Closure clos) {
+        def builder = new AwsDeployConfiguration.Builder()
+        clos.delegate = builder
+        clos.resolveStrategy = Closure.DELEGATE_FIRST
+        clos.call()
+        this.awsDetails = builder.build()
+    }
+
+    void postInstall(Closure clos) {
+        this.postInstall = clos.call()
+    }
 }
