@@ -4,9 +4,12 @@ import gradle.plugins.provisioning.aws.AwsDeployConfiguration
 import gradle.plugins.provisioning.internal.dependencies.Packages
 import gradle.plugins.provisioning.internal.disk.Partitioning
 import gradle.plugins.provisioning.internal.network.Networking
+import gradle.plugins.provisioning.tasks.VirtualBoxProvisioningTask
+import gradle.plugins.provisioning.tasks.aws.AmazonProvisioningTask
 import gradle.plugins.provisioning.virtualbox.VirtualBoxMachineDetails
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.Task
 
 class ProvisioningProject {
     String rootpw
@@ -48,6 +51,8 @@ class ProvisioningProject {
     void vbox(Action<VirtualBoxMachineDetails> action) {
         serverDetails = new VirtualBoxMachineDetails()
         action.execute serverDetails
+        def task = project.tasks.create('vboxProvision', VirtualBoxProvisioningTask).dependsOn('assembleInstallImage')
+        replaceProvisionTask(task)
     }
 
     void aws(Closure clos) {
@@ -56,6 +61,13 @@ class ProvisioningProject {
         clos.resolveStrategy = Closure.DELEGATE_FIRST
         clos.call()
         this.awsDetails = builder.build()
+        poweroff = Boolean.TRUE
+        def task = project.tasks.create('amiCreation', AmazonProvisioningTask).dependsOn('vboxProvision')
+        replaceProvisionTask(task)
+    }
+
+    private void replaceProvisionTask(Task newLast) {
+        project.tasks.replace('provision').dependsOn(newLast)
     }
 
     void postInstall(Closure clos) {

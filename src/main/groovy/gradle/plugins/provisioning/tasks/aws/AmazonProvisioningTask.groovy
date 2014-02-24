@@ -13,7 +13,7 @@ import gradle.plugins.provisioning.virtualbox.VirtualBoxMachineDetails
 class AmazonProvisioningTask extends AbstractProvisioningTask {
 
     void provision() {
-        def deployer = provisioning.serverDetails.deployer
+        def deployer = getProvisioning().serverDetails.deployer
 
         println "Pooling for installation completion..."
         Thread.start {
@@ -28,12 +28,16 @@ class AmazonProvisioningTask extends AbstractProvisioningTask {
 
         deployer.cloneHardDiskToRaw()
 
-        def amiCreator = new AmiCreator(deployer.getHardDiskFileName('raw'), provisioning.awsDetails)
-        amiCreator.run()
+        def amiCreator = new AmiCreator(deployer.getHardDiskFileName('raw'), getProvisioning().awsDetails)
+        try {
+            amiCreator.run()
+        } catch (e) {
+            deployer.release()
+        }
     }
 
     VirtualBoxMachineDetails getMachineDetails() {
-        provisioning.serverDetails
+        getProvisioning().serverDetails
     }
 
     class AmiCreator implements Runnable {
@@ -54,7 +58,7 @@ class AmazonProvisioningTask extends AbstractProvisioningTask {
         void importInstance() {
             println "Importing instance."
             def process = new AwsImportInstanceProcess(config.bucket, config.accessKeyId, config.accessSecret,
-                    vboxDiskFile, machineDetails.x64)
+                    vboxDiskFile, getMachineDetails().x64)
             process.exec()
             String taskId = (process.stdout =~ /TaskId(.*)ExpirationTime/)[0][1].trim()
             String instanceId = (process.stdout =~ /InstanceID(.*)\n/)[0][1].trim()
@@ -80,7 +84,7 @@ class AmazonProvisioningTask extends AbstractProvisioningTask {
 
         void createAmi() {
             println "Creating AMI."
-            def name = machineDetails.name
+            def name = getMachineDetails().name
             if (name.length() < 3) {
                 (3 - name.length()).times { name += "0" }
             }

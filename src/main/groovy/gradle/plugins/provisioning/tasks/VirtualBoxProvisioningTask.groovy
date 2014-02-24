@@ -18,9 +18,13 @@ import org.virtualbox_4_1.VirtualBoxManager
 class VirtualBoxProvisioningTask extends AbstractProvisioningTask {
 
     void provision() {
-        if (provisioning.serverDetails) {
+        if (getProvisioning().serverDetails) {
             def deployer = new Deployer()
-            deployer.run()
+            try {
+                deployer.run()
+            } catch (e) {
+                deployer.release()
+            }
         }
     }
 
@@ -38,7 +42,7 @@ class VirtualBoxProvisioningTask extends AbstractProvisioningTask {
         private IMachine machine
 
         Deployer() {
-            this.machineDetails = provisioning.serverDetails
+            this.machineDetails = getProvisioning().serverDetails
 
             this.manager = VirtualBoxManager.createInstance(machineDetails.home)
             manager.connect machineDetails.apiUrl, machineDetails.username, machineDetails.password
@@ -99,7 +103,7 @@ class VirtualBoxProvisioningTask extends AbstractProvisioningTask {
 
         void attachIso() {
             withLockAndSave {
-                IMedium dvd = box.openMedium(isoPath, DeviceType.DVD, AccessMode.ReadOnly, true)
+                IMedium dvd = box.openMedium(getIsoPath(), DeviceType.DVD, AccessMode.ReadOnly, true)
                 session.machine.attachDevice "IDE", 0, 0, DeviceType.DVD, dvd
             }
         }
@@ -112,6 +116,10 @@ class VirtualBoxProvisioningTask extends AbstractProvisioningTask {
 
         boolean isComplete() {
             session.state == SessionState.Unlocked
+        }
+
+        void release() {
+            session.unlockMachine()
         }
 
         void run() throws Exception {

@@ -12,7 +12,6 @@ class AwsDeployConfiguration {
         this.accessKeyId = accessKeyId
         this.accessSecret = accessSecret
 
-        assert apiUrl, "AWS API URL Cannot be null. [env/sys: AWS_API_URL]"
         assert bucket, "AWS S3 Bucket Cannot be null. [env/sys: S3_BUCKET]"
         assert accessKeyId, "AWS Access Key ID Cannot be null."
         assert accessSecret, "AWS Access Secret cannot be null."

@@ -10,6 +10,6 @@ abstract class AbstractProvisioningTask extends DefaultTask {
     abstract void provision()
 
     ProvisioningProject getProvisioning() {
-        (ProvisioningProject) project.provisioning
+        project.extensions.findByType(ProvisioningProject)
     }
 }

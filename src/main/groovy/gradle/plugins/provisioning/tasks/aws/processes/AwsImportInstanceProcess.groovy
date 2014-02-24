@@ -14,9 +14,9 @@ class AwsImportInstanceProcess {
                 '-f RAW',
                 '-t m3.xlarge',
                 (x64 ? '-a x86_64' : '-a i386'),
-                "--bucket $awsApiConfiguration.bucket",
-                "-o $awsApiConfiguration.accessKeyId",
-                "-w $awsApiConfiguration.accessSecret",
+                "--bucket $bucket",
+                "-o $accessKeyId",
+                "-w $accessSecret",
                 '-p Linux'
         ]
         this.command = "$bin ${args.join(' ')}"
