@@ -156,7 +156,7 @@ The build user will also need the `EC2_HOME`, `EC2_CERT`, and `EC2_PRIVATE_KEY` 
 License
 ---
 
-Still trying to work this out.
+This project and all its contents are licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 Author
 ---

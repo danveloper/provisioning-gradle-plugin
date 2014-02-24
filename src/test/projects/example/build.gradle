@@ -1,0 +1,75 @@
+import static gradle.plugins.provisioning.types.BootProto.*
+
+apply plugin: 'provisioning'
+
+version = "1.0.RELEASE"
+
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+  dependencies {
+    classpath group: 'com.danveloper', name: 'provisioning-gradle-plugin', version: '0.1-SNAPSHOT'
+  }
+}
+
+provisioning {
+  installImage = "http://mirror.ancl.hawaii.edu/linux/centos/6.5/isos/x86_64/CentOS-6.5-x86_64-netinstall.iso"
+
+  // generated with "grub-crypt"
+  rootpw       = '$6$M2N0GvDMV.hro4Nj$6/4W1SmGuWs8fscbdNLfp4fGFpEt93Y7kCNi8jnjN5JIkPy8YJGkkjCwImyXtCiheMyAkUR24IPgcrfeIliB7/'
+
+  vbox {
+    apiUrl = "http://localhost:18083"
+    name   = "web"
+  }
+
+  aws {
+    credentials "/Users/danw/.aws-credentials-master"
+    bucket "dan-bar-busket"
+  }
+
+  network {
+    device("eth0") {
+      bootproto = DHCP
+      onboot    = true
+      ipv6      = false
+    }
+  }∂
+
+  partitioning {
+    clear(init: true)
+
+    part {
+      mntpoint = "/"
+      fstype   = "ext4"
+      size     = 1
+      grow     = true
+    }
+
+    part {
+      mntpoint    = "swap"
+      recommended = true
+    }
+  }
+
+  packages {
+    // or, perhaps more preferrably, a network-local repo
+    url "http://192.168.1.108/cent"
+
+    // kickstart package groups
+    group "base"
+    group "core"
+    group "console-internet"
+    group "server-platform"
+
+  }
+
+  postInstall {
+    '''\
+      | chkconfig iptables off
+    '''.stripMargin()
+  }
+
+}
