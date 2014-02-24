@@ -6,13 +6,10 @@ Gradle Plugin for Driving Server Provisioning Through Configuration
 Tasks
 ---
 
-The plugin provides a few tasks dedicated to the assembly of installation media, as well as the automation of server provisioning. Given a configuration similar to the one below, you would expect to only ever need to use the `gradle provision` task, which would handle the retrieval of the network installation media, its modification, and the automation of the server's deployment.
+The plugin provides a few tasks dedicated to the assembly of installation media, as well as the automation of server provisioning. The plugin exposes a DSL extension to the Gradle build script, which will be used as a descriptor when generating the installation's kickstart configuration.
 
-Other tasks that are available:
-  * `generateKickstart`, generates the kickstart configuration from the build script
-  * `downloadInstallImage`, downloads and caches the network installation media
-  * `assembleInstallImage`, manipulates the install iso for unattended install
-  * `provisionServer`, given a provisioning engine (VirtualBox for now), this task will deploy a new server from the below configuration below, attach the installation media, perform the unattended install, and reboot itself in a ready-to-use state.
+Given a configuration like the sample below, the `gradle provision` command will produce an installation ISO that is configured for unattended installation.
+
 
 Sample Build Script
 ---
@@ -39,14 +36,6 @@ provisioning {
   
   // generated with "grub-crypt"
   rootpw       = '$6$M2N0GvDMV.hro4Nj$6/4W1SmGuWs8fscbdNLfp4fGFpEt93Y7kCNi8jnjN5JIkPy8YJGkkjCwImyXtCiheMyAkUR24IPgcrfeIliB7/'
-
-  vbox {
-    apiUrl = "http://localhost:18083"
-    name   = "web"
-    x64    = true
-    memory = 1024
-    disk   = 8589934592
-  }
 
   network {
     device("eth0") {
@@ -102,6 +91,67 @@ provisioning {
 }
 
 ```
+
+Server Deployment
+---
+
+The plugin also provides tasks for automating the server's deployment to VirtualBox or Amazon AWS.
+
+### VirtualBox
+
+In order to trigger deployment to VirtualBox, you will need to add the `vbox` configuration block to the `provisioning` section of your build script. 
+
+```groovy
+provisioning {
+  ...
+  
+  vbox {
+    apiUrl   = "http://localhost:18083" // required
+    name     = "web" // required
+    home     = "/opt/vbox" // optional
+    username = "user" // optional
+    password = "pass" // optional
+  }
+  
+  ...
+}
+```
+
+To facilitate deployment to VirtualBox, the VirtualBox binaries will need to be in the build user's PATH, and as well the VirtualBox Web API server will need to be running. After VirtualBox is installed, use the `vboxwebsrv` command to start the Web API. Please read the [VirtualBox SDK](http://download.virtualbox.org/virtualbox/SDKRef.pdf) manual for a full discussion on VirtualBox authentication. As a quick-start option, you can disable authenitcation with the following command: `VBoxManage setproperty websrvauthlibrary null`.
+
+### Amazon AWS
+
+The plugin's AWS integration will provide the necessary steps to deploy a server from the installation media, upload that instance to AWS, and create an Amazon Machine Image (AMI) from the produced instance. In order to trigger deployment to AWS, you will need to have the `aws` *and* `vbox` configuration blocks in the `provisioning` section of your build script.
+
+```groovy
+provisioning {
+  ...
+  
+  vbox {
+    apiUrl   = "http://localhost:18083" // required
+    name     = "web" // required
+    home     = "/opt/vbox" // optional
+    username = "user" // optional
+    password = "pass" // optional
+  }
+  
+  aws {
+    apiUrl       = "ec2.us-east-1.amazonaws.com" // optional. This is default as defined by the AWS SDK.
+    bucket       = "s3-bucket" // required. This is where the instance's hard disk will be stored during conversion.
+    credentials  = "/home/user/.aws-credentials-master" // conditionally optional. This is a properties file w/ the AWSAccessKeyID and AWSSecretKey key/value pairs.
+    accessKeyId  = "AKI...." // conditionally optional. If no "credentials" directive is applied, this is required!
+    accessSecret = "wUQ...." // conditionally optional. If no "credentials" directive is applied, this is required!
+  }
+  
+  ...
+}
+```
+
+The `vbox` block is necessary because before we can ship the server instance to AWS, we need to have a machine to ship. In order to bridge the gap from the produced installation media to a fully-available server deployment, the installation is deployed within VirtualBox. The plugin recognizes when the installation has completed, and proceeds to conver the VirtualBox disk and ship it to AWS.
+
+In order to facilitate the bridge, both the VirtualBox binaries and the AWS EC2 Tools binaries will need to be on the build user's PATH. This is necessary due to a short-coming in both the VirtualBox and AWS SDKs. In the case of the former, the mechanism to initiate a hard disk conversion isn't support, and in the latter the mecanism deliver the image is dependent on external commands from the Tools binaries.
+
+The build user will also need the `EC2_HOME`, `EC2_CERT`, and `EC2_PRIVATE_KEY` environment variables exported at build time. These are used in obscure ways by both the AWS SDK and the Tools binaries. Please refer to the _Getting Started_ section of the [AWS SDK Documentation](http://docs.aws.amazon.com/AWSSdkDocsJava/latest/DeveloperGuide/java-dg-setup.html) for instructions on getting the necessary credentials for the plugin to success.
 
 License
 ---
