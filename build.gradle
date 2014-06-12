@@ -18,6 +18,7 @@ bintray {
   pkg {
     userOrg = 'danveloper'
     repo = 'maven'
+    labels = ['provisioning', 'amazon', 'virtualbox', 'continuous deployment']
   }
 }
 
