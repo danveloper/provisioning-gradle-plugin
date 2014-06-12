@@ -15,9 +15,10 @@ group = "com.github.danveloper.provisioning"
 archivesBaseName = "provisioning"
 
 bintray {
+  publications = ['plugin']
   pkg {
-    userOrg = 'danveloper'
     repo = 'maven'
+    licenses = ['Apache-2.0']
     labels = ['provisioning', 'amazon', 'virtualbox', 'continuous deployment']
   }
 }
