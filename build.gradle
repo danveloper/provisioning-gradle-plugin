@@ -12,12 +12,12 @@ apply plugin: 'groovy'
 apply plugin: 'idea'
 
 group = "com.github.danveloper.provisioning"
-archivesBaseName = "provisioning"
 
 bintray {
   publications = ['plugin']
   pkg {
     repo = 'maven'
+    name = 'provisioning-gradle-plugin'
     licenses = ['Apache-2.0']
     labels = ['provisioning', 'amazon', 'virtualbox', 'continuous deployment']
   }
