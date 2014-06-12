@@ -14,7 +14,6 @@ apply plugin: 'idea'
 group = "com.github.danveloper.provisioning"
 
 bintray {
-  publications = ['plugin']
   pkg {
     repo = 'maven'
     name = 'provisioning-gradle-plugin'
