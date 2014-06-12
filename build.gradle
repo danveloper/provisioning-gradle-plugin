@@ -15,8 +15,8 @@ group = "com.github.danveloper.provisioning"
 
 bintray {
   pkg {
+    userOrg = 'danveloper'
     repo = 'maven'
-    name = 'provisioning-gradle-plugin'
     licenses = ['Apache-2.0']
     labels = ['provisioning', 'amazon', 'virtualbox', 'continuous deployment']
   }
