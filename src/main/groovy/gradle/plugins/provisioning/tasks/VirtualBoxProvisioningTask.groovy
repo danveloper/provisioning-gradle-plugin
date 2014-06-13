@@ -111,7 +111,7 @@ class VirtualBoxProvisioningTask extends AbstractProvisioningTask {
         void network() {
             withLockAndSave {
                 def adapter = session.machine.getNetworkAdapter(0)
-                adapter.attachmentType = NetworkAttachmentType.NAT
+                adapter.attachmentType = NetworkAttachmentType.Bridged
                 adapter.bridgedInterface = box.host.networkInterfaces.get(0).name
             }
         }
